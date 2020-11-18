@@ -1,4 +1,5 @@
 #!/bin/bash
-dockerd &> /docker.log &
+/etc/init.d/ssh start > /dev/null
+/etc/init.d/docker start > /dev/null
 cd /home/altis
-sudo -u altis /bin/bash
+su altis
