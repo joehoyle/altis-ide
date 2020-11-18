@@ -47,5 +47,9 @@ RUN sudo -u altis mkdir /home/altis/.ssh && sudo -u altis touch /home/altis/.ssh
 RUN ["chmod", "+x", "/docker-entrypoint.sh"]
 
 EXPOSE 443
+EXPOSE 22
 
 ENTRYPOINT [ "/docker-entrypoint.sh"]
+WORKDIR /home/altis
+
+CMD tail -f /dev/null
