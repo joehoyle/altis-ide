@@ -32,6 +32,9 @@ RUN sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/doc
 RUN curl https://getcomposer.org/composer-stable.phar --output /usr/local/bin/composer && chmod +x /usr/local/bin/composer
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.0/install.sh | bash
 
+RUN curl -L https://github.com/cli/cli/releases/download/v1.3.0/gh_1.3.0_linux_amd64.deb --output /tmp/gh.deb && \
+	dpkg -i /tmp/gh.deb && rm /tmp/gh.deb
+
 RUN adduser --home /home/altis --shell /bin/bash --disabled-password --gecos '' altis
 RUN chown altis:altis /home/altis
 RUN passwd -d altis
@@ -46,6 +49,8 @@ COPY sshd /etc/ssh/sshd_config
 RUN sudo -u altis mkdir /home/altis/.ssh && sudo -u altis touch /home/altis/.ssh/authorized_keys
 RUN ["chmod", "+x", "/docker-entrypoint.sh"]
 
+RUN apt-get install --yes php7.3-mbstring
+RUN sudo -u altis composer global require humanmade/psalm-plugin-wordpress
 EXPOSE 443
 EXPOSE 22
 
