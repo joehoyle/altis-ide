@@ -1,0 +1,75 @@
+name: Docker Build
+
+on:
+  push:
+    branches:
+      - 'master'
+  release:
+    types: [released]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          driver-opts: network=host
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build base image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: localhost:5000/docker-wordpress-php:latest
+      -
+        name: Build and push latest
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: joehoyle/altis-ide:latest
+      -
+        name: Build and push release
+        if: github.event_name == 'release'
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: joehoyle/altis-ide:${{ github.event.release.tag_name }}
+      -
+        name: Build and push pull request
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: joehoyle/altis-ide:pull-request-${{ github.event.pull_request.number }}
